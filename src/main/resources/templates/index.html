@@ -13,6 +13,10 @@
 		<h1>Login Here</h1>
 		<form th:action="@{/login}" th:object="${user}" method="POST">
 			
+			<font color = "red">
+			<p th:text="${emsg}"></p>
+			</font>
+			
 			<table>
 				
 				<tr>

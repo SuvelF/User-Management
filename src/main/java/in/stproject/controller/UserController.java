@@ -1,10 +1,18 @@
 package in.stproject.controller;
 
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 
+import in.stproject.dto.QuoteResponseDto;
+import in.stproject.dto.ResetpwdDto;
 import in.stproject.dto.UserDto;
 import in.stproject.service.UserService;
 
@@ -27,5 +35,60 @@ public class UserController {
 		return "index";
 	}
 	
+	
+	@PostMapping("/login")
+	public String login(@ModelAttribute("user") UserDto user, Model model) {
+		
+		UserDto login = userService.login(user.getEmail(), user.getPwd());
+		if(login==null) {
+			model.addAttribute("emsg","Invalid Credentials");
+			return "index";
+		}
+		
+		if(login.getPwdUpdaed().equals("YES")) {
+		
+			//Display Dashboard page
+			
+			QuoteResponseDto quotation = userService.getQuotation();
+		    model.addAttribute("quote",quotation);
+		    return "dashboard";
+		
+		}
+		else {
+			//Display reset pwd page
+			
+			ResetpwdDto resetPwd = new ResetpwdDto();
+			resetPwd.setEmail(null);
+			model.addAttribute("resetPwd", resetPwd);
+			return "resetPwd";
+		}
+		
+		
+	}
+	
+	@GetMapping("/register")
+	public String register(Model model) {
+		
+		UserDto userDto = new UserDto();
+		
+		model.addAttribute("user", userDto);
+		
+		Map<Integer, String> countriesMap = userService.getCountries();
+		model.addAttribute("countries",countriesMap);
+		
+		return "register";
+	}
+	
+	@GetMapping("/states/{countryId}")
+	@ResponseBody
+	public Map<Integer, String> getstates(@PathVariable Integer countryId){
+		return userService.getState(countryId);
+	}
+	
+	@GetMapping("/cities/{stateId}")
+	@ResponseBody
+	public Map<Integer, String> getcities(@PathVariable Integer stateId){
+		return userService.getCity(stateId);
+	}
 	
 }
