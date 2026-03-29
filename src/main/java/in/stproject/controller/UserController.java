@@ -91,4 +91,30 @@ public class UserController {
 		return userService.getCity(stateId);
 	}
 	
+	@PostMapping("/register")
+	public String registerUser(@ModelAttribute("user") UserDto user, Model model) {
+		
+		boolean emailUnique = userService.isEmailUnique(user.getEmail());
+		if(emailUnique) {
+			
+			boolean register = userService.register(user);
+			
+			if(register) {
+				model.addAttribute("smsg", "Registration Success");
+			}
+			else {
+				model.addAttribute("emsg", "Registration Failed");
+			}
+		}
+			else {
+			
+			model.addAttribute("emsg","Duplicate Email Found");
+			
+		}
+		
+		Map<Integer, String> countriesMap = userService.getCountries();
+		model.addAttribute("countries",countriesMap);
+		
+		return "register";
+	}
 }
