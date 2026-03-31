@@ -58,7 +58,7 @@ public class UserController {
 			//Display reset pwd page
 			
 			ResetpwdDto resetPwd = new ResetpwdDto();
-			resetPwd.setEmail(null);
+			resetPwd.setEmail(login.getEmail());
 			model.addAttribute("resetPwd", resetPwd);
 			return "resetPwd";
 		}
@@ -117,4 +117,35 @@ public class UserController {
 		
 		return "register";
 	}
+	
+	@PostMapping("/resetPwd")
+	public String resetPwd(@ModelAttribute("resetPwd") ResetpwdDto resetPwd, Model model) {
+		
+		UserDto login =userService.login(resetPwd.getEmail(), resetPwd.getOldPwd());
+		
+		if(login == null) {
+			model.addAttribute("emsg","Old Pwd is incorrect");
+			return "resetPwd";
+		}
+		
+		if(resetPwd.getNewPwd().equals(resetPwd.getConfirmPwd())){
+		userService.resetPwd(resetPwd);
+		QuoteResponseDto quotation = userService.getQuotation();
+		model.addAttribute("quote", quotation);
+		return "dashboard";
+		
+		}
+		else {
+			model.addAttribute("emsg","New Pwd and Confirm Pwd Not Matching");
+			return "resetPwd";
+		}
+	}
+	
+	@GetMapping("/getQuote")
+	public String getQuote(Model model) {
+		QuoteResponseDto quotation = userService.getQuotation();
+		model.addAttribute("quote", quotation);
+		return "dashboard";
+	}
+	
 }
